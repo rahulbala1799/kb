@@ -109,110 +109,237 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-500 to-purple-600 text-white">
-      {/* Waiting Phase - Show QR Code */}
+      {/* Waiting Phase - Spectacular Birthday Homepage */}
       {gameState.phase === 'waiting' && (
-        <div className="flex items-center justify-center min-h-screen p-8">
-          <div className="text-center max-w-6xl w-full">
-            <div className="mb-8">
-              <div className="text-8xl mb-4 animate-bounce">🎉</div>
-              <h1 className="text-6xl font-bold mb-4">Happy 30th Birthday!</h1>
-              <h2 className="text-4xl font-semibold mb-6">Ann! 🎂</h2>
-              <p className="text-2xl mb-8">Let&apos;s play birthday trivia!</p>
+        <div className="relative min-h-screen overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600">
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-300 rounded-full animate-pulse"></div>
+              <div className="absolute top-32 right-20 w-16 h-16 bg-pink-300 rounded-full animate-bounce delay-100"></div>
+              <div className="absolute bottom-20 left-32 w-24 h-24 bg-purple-300 rounded-full animate-pulse delay-200"></div>
+              <div className="absolute bottom-40 right-16 w-12 h-12 bg-blue-300 rounded-full animate-bounce delay-300"></div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* QR Code */}
-              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8">
-                <h3 className="text-3xl font-bold mb-6">📱 Scan to Join!</h3>
-                {qrCodeUrl && (
-                  <div className="bg-white p-6 rounded-2xl inline-block mb-6">
-                    <Image src={qrCodeUrl} alt="QR Code" width={320} height={320} />
-                  </div>
-                )}
-                <p className="text-xl mb-4">Game Code: <span className="font-bold text-yellow-300 text-3xl">{gameCode}</span></p>
-              </div>
-
-              {/* Players List */}
-              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8">
-                <h3 className="text-3xl font-bold mb-6">🎊 Players ({players.length})</h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {players.length === 0 ? (
-                    <p className="text-white/60 text-xl py-12">Waiting for players...</p>
-                  ) : (
-                    players.map(player => (
-                      <div key={player.id} className="bg-white/10 p-4 rounded-xl flex justify-between items-center">
-                        <span className="text-xl font-semibold">Player {player.id.slice(-4)}</span>
-                        <span className="text-green-300 text-lg">✅ Ready</span>
-                      </div>
-                    ))
-                  )}
+          <div className="relative z-10 flex items-center justify-center min-h-screen p-8">
+            <div className="text-center max-w-7xl w-full">
+              {/* Main Birthday Header */}
+              <div className="mb-12">
+                <div className="flex justify-center items-center mb-8">
+                  <div className="text-9xl animate-bounce mr-4">🎉</div>
+                  <div className="text-9xl animate-bounce delay-100 mr-4">🎂</div>
+                  <div className="text-9xl animate-bounce delay-200">🎊</div>
                 </div>
                 
-                {players.length > 0 && (
-                  <button
-                    onClick={startGame}
-                    className="mt-6 bg-green-500 text-white px-8 py-4 rounded-xl font-bold text-xl
-                             hover:bg-green-600 transition-all duration-300"
-                  >
-                    🎊 Start Game! 🎊
-                  </button>
-                )}
+                <h1 className="text-8xl font-black mb-6 bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent animate-pulse">
+                  HAPPY 30TH
+                </h1>
+                <h2 className="text-6xl font-bold mb-8 text-white drop-shadow-2xl">
+                  🌟 ANN&apos;S BIRTHDAY BASH! 🌟
+                </h2>
+                <div className="text-3xl mb-8 text-yellow-200 font-semibold">
+                  🎮 Let&apos;s Play Birthday Trivia! 🎮
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+                {/* QR Code Section */}
+                <div className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-4xl mb-6">📱✨</div>
+                  <h3 className="text-3xl font-bold mb-6 text-yellow-200">Scan to Join!</h3>
+                  {qrCodeUrl && (
+                    <div className="bg-white p-8 rounded-3xl inline-block mb-6 shadow-xl transform hover:scale-105 transition-transform">
+                      <Image src={qrCodeUrl} alt="QR Code" width={280} height={280} />
+                    </div>
+                  )}
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-6 py-4 rounded-2xl font-black text-2xl mb-4">
+                    {gameCode}
+                  </div>
+                  <p className="text-lg text-white/90">Point your camera here!</p>
+                </div>
+
+                {/* Players List */}
+                <div className="bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-4xl mb-6">👥🎊</div>
+                  <h3 className="text-3xl font-bold mb-6 text-yellow-200">Party Players ({players.length})</h3>
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {players.length === 0 ? (
+                      <div className="py-16">
+                        <div className="text-6xl mb-4 animate-pulse">⏳</div>
+                        <p className="text-white/70 text-xl">Waiting for birthday guests...</p>
+                      </div>
+                    ) : (
+                      players.map((player, index) => (
+                        <div key={player.id} className="bg-gradient-to-r from-white/20 to-white/10 p-4 rounded-2xl flex justify-between items-center transform hover:scale-105 transition-transform">
+                          <div className="flex items-center space-x-3">
+                            <div className="text-2xl">{index === 0 ? '👑' : '🎉'}</div>
+                            <span className="text-xl font-bold text-white">{player.name}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-green-300 text-2xl">✅</span>
+                            <span className="text-yellow-300 font-bold">{player.score} pts</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  
+                  {players.length > 0 && (
+                    <button
+                      onClick={startGame}
+                      className="mt-8 w-full bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-6 rounded-2xl font-black text-2xl
+                               hover:from-green-500 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-xl"
+                    >
+                      🚀 START THE PARTY! 🚀
+                    </button>
+                  )}
+                </div>
+
+                {/* Game Info & Instructions */}
+                <div className="bg-gradient-to-br from-indigo-500/30 to-purple-500/30 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-4xl mb-6">🎯🎂</div>
+                  <h3 className="text-3xl font-bold mb-6 text-yellow-200">How to Play</h3>
+                  <div className="space-y-4 text-left">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">1️⃣</div>
+                      <div className="text-lg text-white/90">Scan QR code with your phone camera</div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">2️⃣</div>
+                      <div className="text-lg text-white/90">Enter your name to join</div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">3️⃣</div>
+                      <div className="text-lg text-white/90">Answer trivia questions about Ann!</div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">4️⃣</div>
+                      <div className="text-lg text-white/90">Ann judges the best answers</div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">🏆</div>
+                      <div className="text-lg text-white/90">Win points and celebrate!</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8 p-4 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-2xl">
+                    <div className="text-2xl mb-2">🎊 Scoring 🎊</div>
+                    <div className="text-sm text-white/80 space-y-1">
+                      <div>🥇 1st Place: 100 points</div>
+                      <div>🥈 2nd Place: 50 points</div>
+                      <div>🥉 3rd Place: 25 points</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Question Phase - Show Current Question with Live Answers */}
+      {/* Question Phase - Enhanced Question Display */}
       {(gameState.phase === 'question' || gameState.phase === 'answering') && gameState.currentQuestion && (
-        <div className="flex items-center justify-center min-h-screen p-8">
-          <div className="text-center max-w-6xl w-full">
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-2xl text-white/80">Question {gameState.currentQuestionIndex + 1} of {gameState.totalQuestions}</span>
-                <span className="text-yellow-300 font-bold text-4xl">{gameState.timeRemaining}s</span>
-              </div>
-              
-              <h1 className="text-5xl font-bold mb-8 leading-tight">{gameState.currentQuestion.question}</h1>
-              
-              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8 mb-8">
-                <h3 className="text-2xl font-bold mb-6">📝 Type Your Answer on Your Phone!</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {players.map(player => (
-                    <div key={player.id} className={`p-4 rounded-xl text-center ${
-                      player.hasAnswered ? 'bg-green-500/30 border-green-400' : 'bg-white/10 border-white/20'
-                    } border-2`}>
-                      <div className="text-lg font-semibold">Player {player.id.slice(-4)}</div>
-                      <div className="text-sm mt-2">
-                        {player.hasAnswered ? '✅ Answered' : '⏳ Typing...'}
-                      </div>
-                    </div>
-                  ))}
+        <div className="relative min-h-screen overflow-hidden">
+          {/* Dynamic Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 left-20 w-32 h-32 bg-yellow-400 rounded-full animate-pulse"></div>
+              <div className="absolute bottom-32 right-32 w-24 h-24 bg-pink-400 rounded-full animate-bounce"></div>
+              <div className="absolute top-1/2 left-10 w-16 h-16 bg-blue-400 rounded-full animate-pulse delay-100"></div>
+            </div>
+          </div>
+
+          <div className="relative z-10 flex items-center justify-center min-h-screen p-8">
+            <div className="text-center max-w-7xl w-full">
+              {/* Question Header */}
+              <div className="mb-12">
+                <div className="flex justify-between items-center mb-8 bg-gradient-to-r from-white/20 to-white/10 backdrop-blur-lg rounded-3xl p-6 border-2 border-white/30">
+                  <div className="flex items-center space-x-4">
+                    <div className="text-4xl">❓</div>
+                    <span className="text-3xl font-bold text-yellow-200">
+                      Question {gameState.currentQuestionIndex + 1} of {gameState.totalQuestions}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-4xl">⏰</div>
+                    <span className="text-yellow-300 font-black text-5xl animate-pulse">
+                      {gameState.timeRemaining}s
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 backdrop-blur-lg border-4 border-yellow-300/50 rounded-3xl p-12 mb-8 shadow-2xl">
+                  <div className="text-6xl mb-6">🎂</div>
+                  <h1 className="text-6xl font-black mb-4 text-white drop-shadow-2xl leading-tight">
+                    {gameState.currentQuestion.question}
+                  </h1>
+                  <div className="text-2xl text-yellow-200 font-semibold">
+                    📱 Answer on your phone! 📱
+                  </div>
                 </div>
               </div>
 
-              {/* Live Answers Display */}
-              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8">
-                <h3 className="text-2xl font-bold mb-6">💬 Live Answers</h3>
-                {players.filter(p => p.hasAnswered && p.answer).length === 0 ? (
-                  <p className="text-white/60 text-xl py-8">Waiting for answers...</p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {players
-                      .filter(p => p.hasAnswered && p.answer)
-                      .map(player => (
-                        <div key={player.id} className="bg-white/10 p-6 rounded-xl text-left">
-                          <div className="text-white/80 text-sm mb-2">Player {player.id.slice(-4)}</div>
-                          <div className="text-lg text-white font-medium">
-                            &quot;{player.answer}&quot;
-                          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Player Status */}
+                <div className="bg-gradient-to-br from-green-500/30 to-blue-500/30 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-4xl mb-6">👥📝</div>
+                  <h3 className="text-3xl font-bold mb-6 text-yellow-200">Player Status</h3>
+                  <div className="grid grid-cols-2 gap-4 max-h-80 overflow-y-auto">
+                    {players.map((player) => (
+                      <div key={player.id} className={`p-4 rounded-2xl text-center transition-all duration-500 ${
+                        player.hasAnswered 
+                          ? 'bg-gradient-to-r from-green-400/40 to-emerald-400/40 border-2 border-green-300 transform scale-105' 
+                          : 'bg-white/10 border-2 border-white/20 animate-pulse'
+                      }`}>
+                        <div className="text-2xl mb-2">
+                          {player.hasAnswered ? '✅' : '⏳'}
                         </div>
-                      ))}
+                        <div className="text-lg font-bold text-white">{player.name}</div>
+                        <div className="text-sm mt-2 text-white/80">
+                          {player.hasAnswered ? 'Submitted!' : 'Thinking...'}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-                
-                <div className="mt-6 text-white/70 text-sm">
-                  {players.filter(p => p.hasAnswered).length} of {players.length} players answered
+                </div>
+
+                {/* Live Answers Display */}
+                <div className="bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-4xl mb-6">💬✨</div>
+                  <h3 className="text-3xl font-bold mb-6 text-yellow-200">Live Answers</h3>
+                  <div className="max-h-80 overflow-y-auto">
+                    {players.filter(p => p.hasAnswered && p.answer).length === 0 ? (
+                      <div className="py-16 text-center">
+                        <div className="text-6xl mb-4 animate-bounce">⏳</div>
+                        <p className="text-white/70 text-xl">Waiting for answers...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {players
+                          .filter(p => p.hasAnswered && p.answer)
+                          .map((player) => (
+                            <div key={player.id} className="bg-gradient-to-r from-white/20 to-white/10 p-6 rounded-2xl text-left border border-white/20 transform hover:scale-105 transition-transform">
+                              <div className="flex items-center space-x-3 mb-3">
+                                <div className="text-2xl">💭</div>
+                                <div className="text-white/80 font-bold">{player.name}</div>
+                              </div>
+                              <div className="text-xl text-white font-medium bg-white/10 p-4 rounded-xl">
+                                &quot;{player.answer}&quot;
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-6 text-center">
+                    <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-2xl p-4">
+                      <div className="text-2xl font-bold text-yellow-200">
+                        {players.filter(p => p.hasAnswered).length} of {players.length} answered
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

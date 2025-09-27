@@ -49,12 +49,19 @@ export default function JudgePage() {
   }, [])
 
   useEffect(() => {
-    // Poll for game state updates
-    if (isJudge) {
-      const interval = setInterval(fetchGameState, 2000)
-      return () => clearInterval(interval)
+    // Check if judge is already registered
+    const storedJudgeName = localStorage.getItem('judgeName')
+    if (storedJudgeName) {
+      setJudgeName(storedJudgeName)
+      setIsJudge(true)
     }
-  }, [isJudge, gameCode, fetchGameState])
+  }, [])
+
+  useEffect(() => {
+    // Always poll for game state updates
+    const interval = setInterval(fetchGameState, 2000)
+    return () => clearInterval(interval)
+  }, [fetchGameState])
 
   const handleBecomeJudge = async () => {
     if (!judgeName.trim()) return
@@ -67,6 +74,7 @@ export default function JudgePage() {
       })
       const data = await response.json()
       if (data.success) {
+        localStorage.setItem('judgeName', judgeName.trim())
         setIsJudge(true)
       }
     } catch (error) {
@@ -131,62 +139,100 @@ export default function JudgePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-500 to-purple-600 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <button onClick={goHome} className="text-white/70 hover:text-white mb-4">← Back to Home</button>
-          <h1 className="text-3xl font-bold text-white mb-2">👨‍⚖️ Judge Interface</h1>
-          <p className="text-white/80">Game: {gameCode}</p>
+    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-600">
+      <div className="max-w-6xl mx-auto p-4">
+        {/* Enhanced Header */}
+        <div className="text-center mb-8">
+          <button 
+            onClick={goHome} 
+            className="mb-6 bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30"
+          >
+            ← Back to Big Screen
+          </button>
+          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+            <div className="text-6xl mb-4">👑⚖️</div>
+            <h1 className="text-5xl font-black text-white mb-4 drop-shadow-2xl">JUDGE CONTROL CENTER</h1>
+            <div className="text-2xl text-yellow-200 font-semibold">Ann&apos;s Birthday Trivia • {gameCode}</div>
+          </div>
         </div>
 
         {!isJudge ? (
-          <div className="max-w-md mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">👨‍⚖️ Become Judge</h2>
+          <div className="max-w-lg mx-auto">
+            <div className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-10 shadow-2xl">
+              <div className="text-center mb-8">
+                <div className="text-8xl mb-6">👑</div>
+                <h2 className="text-4xl font-bold text-white mb-4">Welcome, Birthday Judge!</h2>
+                <p className="text-xl text-white/80 mb-6">Enter your name to control the trivia game</p>
+              </div>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <input
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder="Enter your name (e.g., Ann)"
                   value={judgeName}
                   onChange={(e) => setJudgeName(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl 
-                           text-white placeholder-white/70 focus:border-white focus:outline-none"
+                  className="w-full px-6 py-4 bg-white/20 border-2 border-white/30 rounded-2xl 
+                           text-white placeholder-white/70 focus:border-yellow-300 focus:outline-none
+                           text-xl font-semibold backdrop-blur-sm"
                 />
                 <button
                   onClick={handleBecomeJudge}
                   disabled={!judgeName.trim()}
-                  className="w-full bg-green-500 text-white py-3 rounded-xl font-bold
-                           hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed
-                           transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-2xl font-black text-xl
+                           hover:from-green-500 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed
+                           transform hover:scale-105 transition-all duration-300 shadow-xl"
                 >
-                  🎊 Join as Judge 🎊
+                  🎊 START JUDGING! 🎊
                 </button>
               </div>
 
-              <div className="mt-6 text-center text-white/80 text-sm">
-                <p>As the judge, you&apos;ll rank player answers</p>
-                <p>and award points during the game.</p>
+              <div className="mt-8 text-center">
+                <div className="bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-2xl p-6">
+                  <div className="text-2xl mb-3">🎯 Your Powers</div>
+                  <div className="text-white/90 space-y-2">
+                    <div>• Rank player answers</div>
+                    <div>• Award points (100/50/25)</div>
+                    <div>• Control game flow</div>
+                    <div>• Make it fun for everyone!</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Game Status */}
-            <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-6 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                {gameState.phase === 'waiting' && '⏳ Waiting for Game to Start'}
-                {gameState.phase === 'question' && '❓ Question Being Asked'}
-                {gameState.phase === 'answering' && '✍️ Players Answering - Check Big Screen!'}
-                {gameState.phase === 'ranking' && '🏆 Time to Rank Answers!'}
-                {gameState.phase === 'results' && '📊 Showing Results'}
-                {gameState.phase === 'final' && '🎉 Game Complete!'}
+          <div className="space-y-8">
+            {/* Enhanced Game Status */}
+            <div className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 text-center shadow-2xl">
+              <div className="text-5xl mb-4">
+                {gameState.phase === 'waiting' && '⏳'}
+                {gameState.phase === 'question' && '❓'}
+                {gameState.phase === 'answering' && '✍️'}
+                {gameState.phase === 'ranking' && '🏆'}
+                {gameState.phase === 'results' && '📊'}
+                {gameState.phase === 'final' && '🎉'}
+              </div>
+              
+              <h2 className="text-4xl font-bold text-white mb-6">
+                {gameState.phase === 'waiting' && 'Waiting for Game to Start'}
+                {gameState.phase === 'question' && 'Question Being Asked'}
+                {gameState.phase === 'answering' && 'Players Answering - Check Big Screen!'}
+                {gameState.phase === 'ranking' && 'Time to Rank Answers!'}
+                {gameState.phase === 'results' && 'Showing Results'}
+                {gameState.phase === 'final' && 'Game Complete!'}
               </h2>
               
-              <p className="text-white/80">
-                Question {gameState.currentQuestionIndex + 1} of {gameState.totalQuestions}
-              </p>
+              <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-2xl p-4 inline-block">
+                <p className="text-2xl font-bold text-yellow-200">
+                  Question {gameState.currentQuestionIndex + 1} of {gameState.totalQuestions}
+                </p>
+              </div>
+
+              {/* Judge Status */}
+              <div className="mt-6 bg-gradient-to-r from-green-400/20 to-blue-400/20 rounded-2xl p-4">
+                <div className="text-2xl font-bold text-white">
+                  👑 Judge: {judgeName} 👑
+                </div>
+              </div>
             </div>
 
             {/* Start Ranking Button - Show during answering phase */}
