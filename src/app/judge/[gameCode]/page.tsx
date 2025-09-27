@@ -294,14 +294,14 @@ export default function JudgePage() {
                 <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-6 mb-6">
                   <h2 className="text-2xl font-bold text-white mb-4 text-center">🏆 Rank the Answers</h2>
                   <p className="text-white/80 text-center mb-6">
-                    Tap the medal buttons to rank answers. You can give multiple answers the same rank if they're equally good!
+                    Tap the medal buttons to rank answers. You can give multiple answers the same rank if they&apos;re equally good!
                   </p>
                   <div className="bg-yellow-400/20 border-2 border-yellow-300/50 rounded-2xl p-4 mb-6">
                     <div className="text-yellow-200 font-bold text-lg mb-2">💡 Ranking Tips</div>
                     <div className="text-yellow-100 text-sm space-y-1">
-                      <div>• Multiple answers can be 1st place (they'll all get 100 points)</div>
-                      <div>• Multiple answers can be 2nd place (they'll all get 50 points)</div>
-                      <div>• Multiple answers can be 3rd place (they'll all get 25 points)</div>
+                      <div>• Multiple answers can be 1st place (they&apos;ll all get 100 points)</div>
+                      <div>• Multiple answers can be 2nd place (they&apos;ll all get 50 points)</div>
+                      <div>• Multiple answers can be 3rd place (they&apos;ll all get 25 points)</div>
                       <div>• Click the same medal again to remove the ranking</div>
                     </div>
                   </div>
