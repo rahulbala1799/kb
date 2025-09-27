@@ -165,11 +165,11 @@ export default function JudgePage() {
     <div className="min-h-screen bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-600">
       <div className="max-w-6xl mx-auto p-4">
         {/* Enhanced Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-between items-center mb-6">
+        <div className="text-center mb-8 relative z-30">
+          <div className="flex justify-between items-center mb-6 relative z-40">
             <button 
               onClick={goHome} 
-              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30 relative z-20"
+              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30 relative z-50 pointer-events-auto"
             >
               ← Back to Big Screen
             </button>
@@ -178,7 +178,7 @@ export default function JudgePage() {
             {(gameState.phase !== 'waiting') && (
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-red-300/50 relative z-20"
+                className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-red-300/50 relative z-50 pointer-events-auto"
               >
                 🔄 Reset Game
               </button>

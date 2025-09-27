@@ -505,11 +505,11 @@ export default function Home() {
       )}
 
       {/* Admin Controls */}
-      <div className="fixed bottom-4 right-4 space-y-3">
+      <div className="fixed bottom-4 right-4 space-y-3 z-50">
         <div>
           <a 
             href={`/judge/ANNS30TH`}
-            className="block bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all duration-300 shadow-lg text-center"
+            className="block bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all duration-300 shadow-lg text-center relative z-10"
           >
             👑 Judge Interface
           </a>
@@ -520,7 +520,7 @@ export default function Home() {
           <div>
             <button
               onClick={() => setShowResetConfirm(true)}
-              className="block bg-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-600 transition-all duration-300 shadow-lg w-full"
+                  className="block bg-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-600 transition-all duration-300 shadow-lg w-full relative z-10"
             >
               🔄 Reset Game
             </button>
