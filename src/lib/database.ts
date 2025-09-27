@@ -18,7 +18,7 @@ export async function initDb() {
         judge_name VARCHAR(255) NOT NULL,
         current_question_id INTEGER,
         question_index INTEGER DEFAULT 0,
-        total_questions INTEGER DEFAULT 40,
+        total_questions INTEGER DEFAULT 20,
         time_remaining INTEGER DEFAULT 30,
         phase VARCHAR(50) DEFAULT 'waiting',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -60,51 +60,54 @@ export async function initDb() {
     // Clear existing questions and insert Ann's birthday questions
     await pool.query('DELETE FROM questions')
     
-    // Insert Ann's birthday questions
-      const annQuestions = [
-        "In which city was Ann born?",
-        "Which hospital in Riyadh was Ann born in?",
-        "Who is Ann's favorite person in the whole world?",
-        "What value does Ann appreciate the most?",
-        "What is Ann's zodiac sign?",
-        "What company does Ann currently work for?",
-        "What is Ann's professional qualification?",
-        "What should Ann name her first child?",
-        "What is Ann's favorite meal?",
-        "What is Ann's favorite dessert?",
-        "What drink does Ann love most?",
-        "What's Ann's guilty pleasure snack?",
-        "What hobby does Ann enjoy the most with friends?",
-        "What is Ann's favorite time to wake up on weekends?",
-        "What's Ann's favorite excuse for being late?",
-        "What's Ann's most beautiful feature?",
-        "What hobby did Ann recently learn?",
-        "What is Ann's dream car?",
-        "What is Ann's favorite car to drive?",
-        "Who is Ann's favorite Malayalam actor?",
-        "What is Ann's favorite Mohanlal movie?",
-        "What color outfit does Ann love wearing most?",
-        "What's Ann's favorite makeup product?",
-        "What perfume brand does Ann love most?",
-        "What's Ann's go-to outfit when dressing up?",
-        "What country would Ann love to travel to next?",
-        "What's Ann's dream holiday destination?",
-        "Which social media app does Ann use the most?",
-        "Which movie has Ann seen the most times?",
-        "Who is Ann's celebrity crush apart from Mohanlal?",
-        "What is Ann's favorite hobby?",
-        "What's Ann's secret talent that nobody knows yet?",
-        "What's Ann's favorite nickname?",
-        "What's Ann's go-to \"lazy day\" hobby?",
-        "Who is Ann's biggest celebrity crush?",
-        "What is Ann's favorite way to spend weekends?",
-        "What would Ann be if not her current profession?",
-        "What is Ann's favorite festival to celebrate?",
-        "What is Ann's favorite thing about herself?",
-        "What is the one thing people instantly love about Ann?"
-      ]
+    // All Ann's birthday questions (excluding hospital question)
+    const allAnnQuestions = [
+      "In which city was Ann born?",
+      "Who is Ann's favorite person in the whole world?",
+      "What value does Ann appreciate the most?",
+      "What is Ann's zodiac sign?",
+      "What company does Ann currently work for?",
+      "What is Ann's professional qualification?",
+      "What should Ann name her first child?",
+      "What is Ann's favorite meal?",
+      "What is Ann's favorite dessert?",
+      "What drink does Ann love most?",
+      "What's Ann's guilty pleasure snack?",
+      "What hobby does Ann enjoy the most with friends?",
+      "What is Ann's favorite time to wake up on weekends?",
+      "What's Ann's favorite excuse for being late?",
+      "What's Ann's most beautiful feature?",
+      "What hobby did Ann recently learn?",
+      "What is Ann's dream car?",
+      "What is Ann's favorite car to drive?",
+      "Who is Ann's favorite Malayalam actor?",
+      "What is Ann's favorite Mohanlal movie?",
+      "What color outfit does Ann love wearing most?",
+      "What's Ann's favorite makeup product?",
+      "What perfume brand does Ann love most?",
+      "What's Ann's go-to outfit when dressing up?",
+      "What country would Ann love to travel to next?",
+      "What's Ann's dream holiday destination?",
+      "Which social media app does Ann use the most?",
+      "Which movie has Ann seen the most times?",
+      "Who is Ann's celebrity crush apart from Mohanlal?",
+      "What is Ann's favorite hobby?",
+      "What's Ann's secret talent that nobody knows yet?",
+      "What's Ann's favorite nickname?",
+      "What's Ann's go-to \"lazy day\" hobby?",
+      "Who is Ann's biggest celebrity crush?",
+      "What is Ann's favorite way to spend weekends?",
+      "What would Ann be if not her current profession?",
+      "What is Ann's favorite festival to celebrate?",
+      "What is Ann's favorite thing about herself?",
+      "What is the one thing people instantly love about Ann?"
+    ]
 
-    for (const question of annQuestions) {
+    // Shuffle questions and take only 20
+    const shuffledQuestions = allAnnQuestions.sort(() => 0.5 - Math.random())
+    const selectedQuestions = shuffledQuestions.slice(0, 20)
+
+    for (const question of selectedQuestions) {
       await pool.query(
         'INSERT INTO questions (question) VALUES ($1)',
         [question]

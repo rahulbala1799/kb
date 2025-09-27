@@ -33,6 +33,18 @@ export default function PlayPage() {
   const [score, setScore] = useState(0)
   const [loading, setLoading] = useState(false)
 
+  const nextQuestion = async () => {
+    try {
+      await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'nextQuestion' })
+      })
+    } catch (error) {
+      console.error('Error going to next question:', error)
+    }
+  }
+
   const fetchGameState = useCallback(async () => {
     try {
       const response = await fetch('/api/game', {
@@ -217,18 +229,77 @@ export default function PlayPage() {
 
 
         {gameState.phase === 'results' && (
-          <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 text-center">
-            <div className="text-6xl mb-4">🎊</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Points Awarded!</h2>
-            <p className="text-white/80 mb-6">Check the big screen for the full results!</p>
-            
-            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400 p-8 rounded-2xl mb-6">
-              <p className="text-2xl font-bold text-yellow-300 mb-4">🏆 Your Score Update! 🏆</p>
-              <p className="text-5xl font-bold text-white mb-2">{score}</p>
-              <p className="text-xl text-yellow-300">Total Points</p>
+          <div className="space-y-6">
+            <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 text-center">
+              <div className="text-6xl mb-4">🎊</div>
+              <h2 className="text-2xl font-bold text-white mb-4">Question Results!</h2>
+              
+              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400 p-6 rounded-2xl mb-6">
+                <p className="text-2xl font-bold text-yellow-300 mb-4">🏆 Your Score Update! 🏆</p>
+                <p className="text-4xl font-bold text-white mb-2">{score}</p>
+                <p className="text-xl text-yellow-300">Total Points</p>
+              </div>
             </div>
 
-            <p className="text-white/60 text-lg">Waiting for next question...</p>
+            {/* Show Rankings */}
+            {gameState.answers && gameState.answers.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4 text-center">🏆 Question Rankings</h3>
+                <div className="space-y-3">
+                  {gameState.answers
+                    .filter(answer => answer.rank && answer.rank <= 3)
+                    .sort((a, b) => (a.rank || 999) - (b.rank || 999))
+                    .map((answer) => (
+                      <div key={answer.id} className={`p-4 rounded-xl border-2 ${
+                        answer.rank === 1 ? 'bg-yellow-500/20 border-yellow-400' :
+                        answer.rank === 2 ? 'bg-gray-400/20 border-gray-400' :
+                        answer.rank === 3 ? 'bg-orange-500/20 border-orange-400' :
+                        'bg-white/10 border-white/20'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">
+                              {answer.rank === 1 ? '🥇' : answer.rank === 2 ? '🥈' : answer.rank === 3 ? '🥉' : ''}
+                            </span>
+                            <div>
+                              <div className="text-white font-bold">
+                                {answer.rank === 1 ? '1st Place' : answer.rank === 2 ? '2nd Place' : answer.rank === 3 ? '3rd Place' : ''}
+                              </div>
+                              <div className="text-white/80 text-sm">Player {answer.id.slice(-4)}</div>
+                            </div>
+                          </div>
+                          <div className="text-yellow-300 font-bold">
+                            {answer.rank === 1 ? '100' : answer.rank === 2 ? '50' : answer.rank === 3 ? '25' : '0'} pts
+                          </div>
+                        </div>
+                        <div className="mt-2 text-white/90 bg-white/10 p-2 rounded text-sm">
+                          &quot;{answer.answer}&quot;
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            <div className="text-center">
+              {gameState.currentQuestionIndex < gameState.totalQuestions - 1 ? (
+                <div className="space-y-4">
+                  <button
+                    onClick={nextQuestion}
+                    className="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-xl
+                             hover:bg-blue-600 transition-all duration-300"
+                  >
+                    ➡️ Next Question
+                  </button>
+                  <p className="text-white/60 text-sm">Or wait for the judge to continue</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-white/60 text-lg">Last question completed!</p>
+                  <p className="text-white/80 text-sm">Check the big screen for final results</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
