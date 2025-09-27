@@ -43,7 +43,7 @@ export default function PlayPage() {
       const data = await response.json()
       if (data.success) {
         // Check if player is still registered in the current game
-        const playerExists = data.players?.some((p: any) => p.id === playerId)
+        const playerExists = data.players?.some((p: { id: string }) => p.id === playerId)
         
         if (!playerExists && playerId) {
           // Player was removed (game was reset), clear localStorage and redirect to registration

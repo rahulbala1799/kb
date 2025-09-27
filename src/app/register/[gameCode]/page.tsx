@@ -29,7 +29,7 @@ export default function RegisterPage() {
           const data = await response.json()
           
           if (data.success) {
-            const playerExists = data.players?.some((p: any) => p.id === storedPlayerId)
+            const playerExists = data.players?.some((p: { id: string }) => p.id === storedPlayerId)
             
             if (playerExists) {
               // Player still exists in current game, redirect to play
