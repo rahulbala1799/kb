@@ -69,6 +69,9 @@ export async function POST(request: NextRequest) {
       case 'showFinalResults':
         return handleShowFinalResults(SINGLE_GAME_CODE)
       
+      case 'resetGame':
+        return handleResetGame(SINGLE_GAME_CODE)
+      
       default:
         return NextResponse.json({ success: false, message: 'Unknown action' }, { status: 400 })
     }
@@ -460,6 +463,33 @@ async function handleShowFinalResults(gameCode: string) {
   } catch (error) {
     console.error('Error showing final results:', error)
     return NextResponse.json({ success: false, message: 'Failed to show final results' }, { status: 500 })
+  }
+}
+
+async function handleResetGame(gameCode: string) {
+  try {
+    // Reset game state to waiting phase
+    await updateGamePhase(gameCode, 'waiting', 0, 30)
+
+    // Clear all player data
+    await pool.query('DELETE FROM players WHERE game_code = $1', [gameCode])
+    
+    // Clear all answers
+    await pool.query('DELETE FROM answers WHERE game_code = $1', [gameCode])
+
+    // Update game to reset state
+    await pool.query(
+      'UPDATE games SET phase = $2, question_index = 0, time_remaining = 30 WHERE game_code = $1',
+      [gameCode, 'waiting']
+    )
+
+    return NextResponse.json({
+      success: true,
+      message: 'Game reset successfully'
+    })
+  } catch (error) {
+    console.error('Error resetting game:', error)
+    return NextResponse.json({ success: false, message: 'Failed to reset game' }, { status: 500 })
   }
 }
 

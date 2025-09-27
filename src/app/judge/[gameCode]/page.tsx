@@ -28,6 +28,8 @@ export default function JudgePage() {
   })
   const [answers, setAnswers] = useState<Answer[]>([])
   const [rankings, setRankings] = useState<{ [key: string]: number }>({})
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
 
   const fetchGameState = useCallback(async () => {
     try {
@@ -134,6 +136,27 @@ export default function JudgePage() {
     }
   }
 
+  const handleResetGame = async () => {
+    setIsResetting(true)
+    try {
+      const response = await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resetGame' })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        setShowResetConfirm(false)
+        // Game will automatically refresh to waiting state
+      }
+    } catch (error) {
+      console.error('Error resetting game:', error)
+    } finally {
+      setIsResetting(false)
+    }
+  }
+
   const goHome = () => {
     window.location.href = '/'
   }
@@ -143,12 +166,25 @@ export default function JudgePage() {
       <div className="max-w-6xl mx-auto p-4">
         {/* Enhanced Header */}
         <div className="text-center mb-8">
-          <button 
-            onClick={goHome} 
-            className="mb-6 bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30"
-          >
-            ← Back to Big Screen
-          </button>
+          <div className="flex justify-between items-center mb-6">
+            <button 
+              onClick={goHome} 
+              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30"
+            >
+              ← Back to Big Screen
+            </button>
+            
+            {/* Reset Game Button for Judge */}
+            {(gameState.phase !== 'waiting') && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-red-300/50"
+              >
+                🔄 Reset Game
+              </button>
+            )}
+          </div>
+          
           <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
             <div className="text-6xl mb-4">👑⚖️</div>
             <h1 className="text-5xl font-black text-white mb-4 drop-shadow-2xl">JUDGE CONTROL CENTER</h1>
@@ -380,6 +416,50 @@ export default function JudgePage() {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Reset Confirmation Modal */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-red-500/90 to-pink-500/90 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+              <div className="text-center">
+                <div className="text-6xl mb-6">⚠️</div>
+                <h2 className="text-3xl font-bold text-white mb-4">Reset Entire Game?</h2>
+                <p className="text-xl text-white/90 mb-2">This will:</p>
+                <div className="text-white/80 mb-6 space-y-2">
+                  <div>• End the current game immediately</div>
+                  <div>• Remove ALL players</div>
+                  <div>• Clear ALL scores and answers</div>
+                  <div>• Return to waiting screen</div>
+                  <div>• Players must re-register</div>
+                </div>
+                
+                <div className="bg-yellow-400/20 border-2 border-yellow-300/50 rounded-2xl p-4 mb-6">
+                  <div className="text-yellow-200 font-bold text-lg mb-2">👑 Judge Power!</div>
+                  <div className="text-yellow-100 text-sm">
+                    As the judge, you can reset the game at any time. 
+                    Use this if you want to start completely fresh.
+                  </div>
+                </div>
+
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setShowResetConfirm(false)}
+                    className="flex-1 bg-white/20 text-white py-3 rounded-xl font-bold hover:bg-white/30 transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleResetGame}
+                    disabled={isResetting}
+                    className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    {isResetting ? '🔄 Resetting...' : '✅ Reset Game'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

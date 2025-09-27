@@ -38,6 +38,8 @@ export default function Home() {
     timeRemaining: 0
   })
   const [players, setPlayers] = useState<Player[]>([])
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
 
   const fetchGameState = useCallback(async () => {
     try {
@@ -104,6 +106,37 @@ export default function Home() {
       })
     } catch (error) {
       console.error('Error showing final results:', error)
+    }
+  }
+
+  const handleResetGame = async () => {
+    setIsResetting(true)
+    try {
+      const response = await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resetGame' })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        // Clear localStorage for players
+        localStorage.removeItem('playerId')
+        localStorage.removeItem('playerName')
+        // Reset local state
+        setPlayers([])
+        setGameState({
+          phase: 'waiting',
+          currentQuestionIndex: 0,
+          totalQuestions: 3,
+          timeRemaining: 0
+        })
+        setShowResetConfirm(false)
+      }
+    } catch (error) {
+      console.error('Error resetting game:', error)
+    } finally {
+      setIsResetting(false)
     }
   }
 
@@ -450,14 +483,73 @@ export default function Home() {
       )}
 
       {/* Admin Controls */}
-      <div className="fixed bottom-4 right-4">
-        <a 
-          href={`/judge/ANNS30TH`}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-        >
-          Judge Interface
-        </a>
+      <div className="fixed bottom-4 right-4 space-y-3">
+        <div>
+          <a 
+            href={`/judge/ANNS30TH`}
+            className="block bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all duration-300 shadow-lg text-center"
+          >
+            👑 Judge Interface
+          </a>
+        </div>
+        
+        {/* Reset Game Button - Only show if game is active */}
+        {(gameState.phase !== 'waiting' || players.length > 0) && (
+          <div>
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="block bg-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-600 transition-all duration-300 shadow-lg w-full"
+            >
+              🔄 Reset Game
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-red-500/90 to-pink-500/90 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <div className="text-center">
+              <div className="text-6xl mb-6">⚠️</div>
+              <h2 className="text-3xl font-bold text-white mb-4">Reset Game?</h2>
+              <p className="text-xl text-white/90 mb-2">This will:</p>
+              <div className="text-white/80 mb-6 space-y-2">
+                <div>• End the current game</div>
+                <div>• Remove all players</div>
+                <div>• Clear all scores</div>
+                <div>• Start fresh from the beginning</div>
+              </div>
+              
+              {gameState.phase !== 'waiting' && (
+                <div className="bg-yellow-400/20 border-2 border-yellow-300/50 rounded-2xl p-4 mb-6">
+                  <div className="text-yellow-200 font-bold text-lg mb-2">⚠️ Game in Progress!</div>
+                  <div className="text-yellow-100 text-sm">
+                    You are currently on Question {gameState.currentQuestionIndex + 1}. 
+                    All progress will be lost!
+                  </div>
+                </div>
+              )}
+
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 bg-white/20 text-white py-3 rounded-xl font-bold hover:bg-white/30 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleResetGame}
+                  disabled={isResetting}
+                  className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  {isResetting ? '🔄 Resetting...' : '✅ Yes, Reset'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
