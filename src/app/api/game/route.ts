@@ -72,6 +72,12 @@ export async function POST(request: NextRequest) {
       case 'resetGame':
         return handleResetGame(SINGLE_GAME_CODE)
       
+      case 'refreshDatabase':
+        gameStates.delete('db_initialized') // Force reinitialization
+        await initDb()
+        gameStates.set('db_initialized', true)
+        return NextResponse.json({ success: true, message: 'Database refreshed successfully' })
+      
       default:
         return NextResponse.json({ success: false, message: 'Unknown action' }, { status: 400 })
     }
