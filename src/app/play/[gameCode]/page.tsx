@@ -38,17 +38,6 @@ export default function PlayPage() {
   const [score, setScore] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const nextQuestion = async () => {
-    try {
-      await fetch('/api/game', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'nextQuestion' })
-      })
-    } catch (error) {
-      console.error('Error going to next question:', error)
-    }
-  }
 
   const fetchGameState = useCallback(async () => {
     try {
@@ -186,7 +175,7 @@ export default function PlayPage() {
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   placeholder="Type your answer here..."
-                  disabled={hasAnswered || loading}
+                  disabled={hasAnswered || loading || gameState.timeRemaining <= 0}
                   className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl 
                            text-white placeholder-white/70 focus:border-white focus:outline-none
                            resize-none h-24 disabled:opacity-50"
@@ -200,12 +189,12 @@ export default function PlayPage() {
                 
                 <button
                   onClick={submitAnswer}
-                  disabled={hasAnswered || loading || !answer.trim()}
+                  disabled={hasAnswered || loading || !answer.trim() || gameState.timeRemaining <= 0}
                   className="w-full bg-green-500 text-white py-3 rounded-xl font-bold text-lg
                            hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed
                            transition-all duration-300"
                 >
-                  {loading ? '🔄 Submitting...' : hasAnswered ? '✅ Answer Submitted!' : '📝 Submit Answer'}
+                  {loading ? '🔄 Submitting...' : hasAnswered ? '✅ Answer Submitted!' : gameState.timeRemaining <= 0 ? '⏰ Time\'s Up!' : '📝 Submit Answer'}
                 </button>
               </div>
             </div>
@@ -288,16 +277,7 @@ export default function PlayPage() {
 
             <div className="text-center">
               {gameState.currentQuestionIndex < gameState.totalQuestions - 1 ? (
-                <div className="space-y-4">
-                  <button
-                    onClick={nextQuestion}
-                    className="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-xl
-                             hover:bg-blue-600 transition-all duration-300"
-                  >
-                    ➡️ Next Question
-                  </button>
-                  <p className="text-white/60 text-sm">Or wait for the judge to continue</p>
-                </div>
+                <p className="text-white/60 text-lg">Waiting for next question...</p>
               ) : (
                 <div className="space-y-4">
                   <p className="text-white/60 text-lg">Last question completed!</p>

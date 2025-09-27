@@ -441,7 +441,20 @@ async function handleNextQuestion(gameCode: string) {
 
       // Start answering phase after 3 seconds
       setTimeout(async () => {
-        await updateGamePhase(gameCode, 'answering')
+        await updateGamePhase(gameCode, 'answering', undefined, 30)
+        
+        // Start 30-second countdown timer
+        let timeLeft = 30
+        const timer = setInterval(async () => {
+          timeLeft--
+          if (timeLeft > 0) {
+            await updateGamePhase(gameCode, 'answering', undefined, timeLeft)
+          } else {
+            clearInterval(timer)
+            // Time's up - move to ranking phase
+            await updateGamePhase(gameCode, 'ranking')
+          }
+        }, 1000)
       }, 3000)
     } else {
       // No more questions, go to final results

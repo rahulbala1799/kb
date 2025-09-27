@@ -39,7 +39,7 @@ export async function initDb() {
 
       CREATE TABLE IF NOT EXISTS questions (
         id SERIAL PRIMARY KEY,
-        question TEXT NOT NULL,
+        question TEXT NOT NULL UNIQUE,
         category VARCHAR(255),
         difficulty VARCHAR(50),
         explanation TEXT
@@ -109,7 +109,7 @@ export async function initDb() {
 
     for (const question of selectedQuestions) {
       await pool.query(
-        'INSERT INTO questions (question) VALUES ($1)',
+        'INSERT INTO questions (question) VALUES ($1) ON CONFLICT (question) DO NOTHING',
         [question]
       )
     }
