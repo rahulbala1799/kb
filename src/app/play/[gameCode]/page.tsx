@@ -42,6 +42,18 @@ export default function PlayPage() {
       })
       const data = await response.json()
       if (data.success) {
+        // Check if player is still registered in the current game
+        const playerExists = data.players?.some((p: any) => p.id === playerId)
+        
+        if (!playerExists && playerId) {
+          // Player was removed (game was reset), clear localStorage and redirect to registration
+          localStorage.removeItem('playerId')
+          localStorage.removeItem('playerName')
+          localStorage.removeItem('gameCode')
+          router.replace(`/register/${gameCode}`)
+          return
+        }
+        
         setGameState(data.gameState)
         setScore(data.playerScore || 0)
         
@@ -55,7 +67,7 @@ export default function PlayPage() {
     } catch (error) {
       console.error('Error fetching game state:', error)
     }
-  }, [gameCode, playerId, gameState.currentQuestion])
+  }, [gameCode, playerId, gameState.currentQuestion, router])
 
   useEffect(() => {
     // Get player info from localStorage

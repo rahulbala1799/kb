@@ -13,16 +13,46 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Check if already registered for this game
-    const storedPlayerId = localStorage.getItem('playerId')
-    const storedPlayerName = localStorage.getItem('playerName')
+    // Check if already registered for this game by verifying with the server
+    const checkRegistration = async () => {
+      const storedPlayerId = localStorage.getItem('playerId')
+      const storedPlayerName = localStorage.getItem('playerName')
 
-    if (storedPlayerId && storedPlayerName) {
-      setPlayerId(storedPlayerId)
-      setPlayerName(storedPlayerName)
-      setRegistered(true)
-      router.push(`/play`) // Redirect to play page
+      if (storedPlayerId && storedPlayerName) {
+        try {
+          // Verify player still exists in the current game
+          const response = await fetch('/api/game', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getGameState', playerId: storedPlayerId })
+          })
+          const data = await response.json()
+          
+          if (data.success) {
+            const playerExists = data.players?.some((p: any) => p.id === storedPlayerId)
+            
+            if (playerExists) {
+              // Player still exists in current game, redirect to play
+              setPlayerId(storedPlayerId)
+              setPlayerName(storedPlayerName)
+              setRegistered(true)
+              router.push(`/play/${gameCode}`)
+              return
+            }
+          }
+        } catch (error) {
+          console.error('Error checking registration:', error)
+        }
+        
+        // If we reach here, player doesn't exist in current game (game was reset)
+        // Clear localStorage and allow re-registration
+        localStorage.removeItem('playerId')
+        localStorage.removeItem('playerName')
+        localStorage.removeItem('gameCode')
+      }
     }
+
+    checkRegistration()
   }, [router])
 
   const handleRegister = async () => {
@@ -46,9 +76,10 @@ export default function RegisterPage() {
       if (data.success) {
         localStorage.setItem('playerId', newPlayerId)
         localStorage.setItem('playerName', playerName.trim())
+        localStorage.setItem('gameCode', gameCode)
         setPlayerId(newPlayerId)
         setRegistered(true)
-        router.push(`/play`) // Redirect to play page
+        router.push(`/play/${gameCode}`) // Redirect to play page
       } else {
         alert(`Registration failed: ${data.message}`)
       }
