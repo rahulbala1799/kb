@@ -14,6 +14,11 @@ interface GameState {
   currentQuestionIndex: number
   totalQuestions: number
   timeRemaining: number
+  answers?: Array<{
+    id: string
+    answer: string
+    rank?: number
+  }>
 }
 
 export default function PlayPage() {
