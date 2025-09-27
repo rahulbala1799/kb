@@ -483,10 +483,13 @@ async function handleResetGame(gameCode: string) {
     // Clear all answers
     await pool.query('DELETE FROM answers WHERE game_code = $1', [gameCode])
 
-    // Update game to reset state
+    // Get current question count and update game to reset state
+    const questionCount = await pool.query('SELECT COUNT(*) FROM questions')
+    const totalQuestions = parseInt(questionCount.rows[0].count)
+    
     await pool.query(
-      'UPDATE games SET phase = $2, question_index = 0, time_remaining = 30 WHERE game_code = $1',
-      [gameCode, 'waiting']
+      'UPDATE games SET phase = $2, question_index = 0, time_remaining = 30, total_questions = $3 WHERE game_code = $1',
+      [gameCode, 'waiting', totalQuestions]
     )
 
     return NextResponse.json({
