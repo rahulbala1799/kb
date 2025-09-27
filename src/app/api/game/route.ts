@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
       case 'submitAnswer':
         return handleSubmitAnswer(gameCode, playerId, answer)
       
+      case 'startRanking':
+        return handleStartRanking(gameCode)
+      
       case 'submitRankings':
         return handleSubmitRankings(gameCode, rankings)
       
@@ -134,7 +137,7 @@ async function handleGetGameState(gameCode: string, playerId?: string) {
       ? questions[game.question_index] 
       : undefined
 
-    // Get current answers for ranking phase
+    // Get current answers for ranking/results phase
     let answers: Array<{ id: string; answer: string; rank?: number }> = []
     if (game.phase === 'ranking') {
       answers = players
@@ -143,6 +146,24 @@ async function handleGetGameState(gameCode: string, playerId?: string) {
           id: p.player_id,
           answer: p.current_answer,
           rank: undefined
+        }))
+    } else if (game.phase === 'results') {
+      // Get ranked answers from database
+      const rankedAnswersResult = await pool.query(
+        'SELECT player_id, rank FROM answers WHERE game_code = $1 AND question_id = $2 AND rank IS NOT NULL',
+        [gameCode, game.question_index + 1]
+      )
+      const rankMap = new Map()
+      rankedAnswersResult.rows.forEach(row => {
+        rankMap.set(row.player_id, row.rank)
+      })
+
+      answers = players
+        .filter(p => p.current_answer)
+        .map(p => ({
+          id: p.player_id,
+          answer: p.current_answer,
+          rank: rankMap.get(p.player_id)
         }))
     }
 
@@ -213,8 +234,8 @@ async function handleSubmitAnswer(gameCode: string, playerId: string, answer: st
     // Update player answer
     await updatePlayerAnswer(gameCode, playerId, answer)
     
-    // Immediately move to ranking phase so judge gets the answer right away
-    await updateGamePhase(gameCode, 'ranking')
+    // Stay in answering phase - don't auto-advance to ranking
+    // Judge will see answers in real-time on the big screen and judge interface
 
     return NextResponse.json({
       success: true,
@@ -228,7 +249,12 @@ async function handleSubmitAnswer(gameCode: string, playerId: string, answer: st
 
 async function handleSubmitRankings(gameCode: string, rankings: { [key: string]: number }) {
   try {
-    // Award points based on rankings
+    const game = await getGame(gameCode)
+    if (!game) {
+      return NextResponse.json({ success: false, message: 'Game not found' }, { status: 404 })
+    }
+
+    // Award points based on rankings and store rankings in database
     for (const [playerId, rank] of Object.entries(rankings)) {
       let points = 0
       if (rank === 1) points = 100
@@ -238,6 +264,12 @@ async function handleSubmitRankings(gameCode: string, rankings: { [key: string]:
       if (points > 0) {
         await updatePlayerScore(gameCode, playerId, points)
       }
+
+      // Store the ranking in the answers table
+      await pool.query(
+        'INSERT INTO answers (game_code, question_id, player_id, answer_text, rank, points) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING',
+        [gameCode, game.question_index + 1, playerId, '', rank, points]
+      )
     }
 
     // Move to results phase and wait for manual next question
@@ -283,6 +315,21 @@ async function handleStartGame(gameCode: string) {
   } catch (error) {
     console.error('Error starting game:', error)
     return NextResponse.json({ success: false, message: 'Failed to start game' }, { status: 500 })
+  }
+}
+
+async function handleStartRanking(gameCode: string) {
+  try {
+    // Move to ranking phase so judge can rank answers
+    await updateGamePhase(gameCode, 'ranking')
+
+    return NextResponse.json({
+      success: true,
+      message: 'Started ranking phase'
+    })
+  } catch (error) {
+    console.error('Error starting ranking:', error)
+    return NextResponse.json({ success: false, message: 'Failed to start ranking' }, { status: 500 })
   }
 }
 

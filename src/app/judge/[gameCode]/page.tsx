@@ -89,6 +89,25 @@ export default function JudgePage() {
     setRankings(newRankings)
   }
 
+  const startRanking = async () => {
+    try {
+      const response = await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'startRanking', 
+          gameCode 
+        })
+      })
+      const data = await response.json()
+      if (data.success) {
+        // This will move the game to ranking phase
+      }
+    } catch (error) {
+      console.error('Error starting ranking:', error)
+    }
+  }
+
   const submitRankings = async () => {
     try {
       const response = await fetch('/api/game', {
@@ -161,7 +180,7 @@ export default function JudgePage() {
               <h2 className="text-2xl font-bold text-white mb-4">
                 {gameState.phase === 'waiting' && '⏳ Waiting for Game to Start'}
                 {gameState.phase === 'question' && '❓ Question Being Asked'}
-                {gameState.phase === 'answering' && '✍️ Players Answering'}
+                {gameState.phase === 'answering' && '✍️ Players Answering - Check Big Screen!'}
                 {gameState.phase === 'ranking' && '🏆 Time to Rank Answers!'}
                 {gameState.phase === 'results' && '📊 Showing Results'}
                 {gameState.phase === 'final' && '🎉 Game Complete!'}
@@ -171,6 +190,23 @@ export default function JudgePage() {
                 Question {gameState.currentQuestionIndex + 1} of {gameState.totalQuestions}
               </p>
             </div>
+
+            {/* Start Ranking Button - Show during answering phase */}
+            {gameState.phase === 'answering' && (
+              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 text-center">
+                <h3 className="text-2xl font-bold text-white mb-4">📝 Answers Coming In!</h3>
+                <p className="text-white/80 mb-6">Watch the big screen to see player answers in real-time.</p>
+                <p className="text-white/60 mb-6">When you&apos;re ready to rank the answers, click below:</p>
+                
+                <button
+                  onClick={startRanking}
+                  className="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-xl
+                           hover:bg-blue-600 transition-all duration-300"
+                >
+                  🏆 Start Ranking Answers
+                </button>
+              </div>
+            )}
 
             {/* Ranking Interface */}
             {gameState.phase === 'ranking' && answers.length > 0 && (
