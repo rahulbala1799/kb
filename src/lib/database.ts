@@ -18,7 +18,7 @@ export async function initDb() {
         judge_name VARCHAR(255) NOT NULL,
         current_question_id INTEGER,
         question_index INTEGER DEFAULT 0,
-        total_questions INTEGER DEFAULT 3,
+        total_questions INTEGER DEFAULT 40,
         time_remaining INTEGER DEFAULT 30,
         phase VARCHAR(50) DEFAULT 'waiting',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -57,36 +57,58 @@ export async function initDb() {
       );
     `)
 
-    // Insert demo questions about the judge
-    const questionCount = await pool.query('SELECT COUNT(*) FROM questions')
-    if (parseInt(questionCount.rows[0].count) === 0) {
-      const demoQuestions = [
-        {
-          question: "What's the judge's favorite birthday cake flavor?",
-          category: 'Personal',
-          difficulty: 'easy',
-          explanation: 'A fun question about the judge\'s preferences!'
-        },
-        {
-          question: "What gift would the judge want most for their birthday?",
-          category: 'Personal',
-          difficulty: 'easy',
-          explanation: 'Let\'s see who knows the judge best!'
-        },
-        {
-          question: "What's the judge's dream birthday party location?",
-          category: 'Personal',
-          difficulty: 'easy',
-          explanation: 'Where would the judge love to celebrate?'
-        }
+    // Clear existing questions and insert Ann's birthday questions
+    await pool.query('DELETE FROM questions')
+    
+    // Insert Ann's birthday questions
+      const annQuestions = [
+        "In which city was Ann born?",
+        "Which hospital in Riyadh was Ann born in?",
+        "Who is Ann's favorite person in the whole world?",
+        "What value does Ann appreciate the most?",
+        "What is Ann's zodiac sign?",
+        "What company does Ann currently work for?",
+        "What is Ann's professional qualification?",
+        "What should Ann name her first child?",
+        "What is Ann's favorite meal?",
+        "What is Ann's favorite dessert?",
+        "What drink does Ann love most?",
+        "What's Ann's guilty pleasure snack?",
+        "What hobby does Ann enjoy the most with friends?",
+        "What is Ann's favorite time to wake up on weekends?",
+        "What's Ann's favorite excuse for being late?",
+        "What's Ann's most beautiful feature?",
+        "What hobby did Ann recently learn?",
+        "What is Ann's dream car?",
+        "What is Ann's favorite car to drive?",
+        "Who is Ann's favorite Malayalam actor?",
+        "What is Ann's favorite Mohanlal movie?",
+        "What color outfit does Ann love wearing most?",
+        "What's Ann's favorite makeup product?",
+        "What perfume brand does Ann love most?",
+        "What's Ann's go-to outfit when dressing up?",
+        "What country would Ann love to travel to next?",
+        "What's Ann's dream holiday destination?",
+        "Which social media app does Ann use the most?",
+        "Which movie has Ann seen the most times?",
+        "Who is Ann's celebrity crush apart from Mohanlal?",
+        "What is Ann's favorite hobby?",
+        "What's Ann's secret talent that nobody knows yet?",
+        "What's Ann's favorite nickname?",
+        "What's Ann's go-to \"lazy day\" hobby?",
+        "Who is Ann's biggest celebrity crush?",
+        "What is Ann's favorite way to spend weekends?",
+        "What would Ann be if not her current profession?",
+        "What is Ann's favorite festival to celebrate?",
+        "What is Ann's favorite thing about herself?",
+        "What is the one thing people instantly love about Ann?"
       ]
 
-      for (const q of demoQuestions) {
-        await pool.query(
-          'INSERT INTO questions (question, category, difficulty, explanation) VALUES ($1, $2, $3, $4)',
-          [q.question, q.category, q.difficulty, q.explanation]
-        )
-      }
+    for (const question of annQuestions) {
+      await pool.query(
+        'INSERT INTO questions (question) VALUES ($1)',
+        [question]
+      )
     }
     
     console.log('Database initialized successfully')
@@ -96,9 +118,13 @@ export async function initDb() {
 }
 
 export async function createGame(gameCode: string, judgeId: string, judgeName: string) {
+  // Get the actual number of questions in the database
+  const questionCount = await pool.query('SELECT COUNT(*) FROM questions')
+  const totalQuestions = parseInt(questionCount.rows[0].count)
+  
   const result = await pool.query(
-    'INSERT INTO games (game_code, judge_id, judge_name) VALUES ($1, $2, $3) RETURNING *',
-    [gameCode, judgeId, judgeName]
+    'INSERT INTO games (game_code, judge_id, judge_name, total_questions) VALUES ($1, $2, $3, $4) RETURNING *',
+    [gameCode, judgeId, judgeName, totalQuestions]
   )
   return result.rows[0]
 }
