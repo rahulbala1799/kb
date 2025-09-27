@@ -31,6 +31,7 @@ interface GameState {
 export default function Home() {
   const [gameCode, setGameCode] = useState('ANNS30TH') // Fixed game code for the party
   const [qrCodeUrl, setQrCodeUrl] = useState('')
+  const [judgeQrCodeUrl, setJudgeQrCodeUrl] = useState('')
   const [gameState, setGameState] = useState<GameState>({
     phase: 'waiting',
     currentQuestionIndex: 0,
@@ -60,10 +61,16 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    // Generate QR code for player registration
+    // Generate QR codes for player registration and judge interface
     const registrationUrl = `${window.location.origin}/register/ANNS30TH`
+    const judgeUrl = `${window.location.origin}/judge/ANNS30TH`
+    
     QRCode.toDataURL(registrationUrl)
       .then(url => setQrCodeUrl(url))
+      .catch(err => console.error(err))
+      
+    QRCode.toDataURL(judgeUrl)
+      .then(url => setJudgeQrCodeUrl(url))
       .catch(err => console.error(err))
   }, [gameCode])
 
@@ -176,7 +183,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 items-start">
                 {/* QR Code Section */}
                 <div className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
                   <div className="text-4xl mb-6">📱✨</div>
@@ -190,6 +197,21 @@ export default function Home() {
                     {gameCode}
                   </div>
                   <p className="text-lg text-white/90">Point your camera here!</p>
+                </div>
+
+                {/* Judge QR Code Section */}
+                <div className="bg-gradient-to-br from-red-500/30 to-orange-500/30 backdrop-blur-lg border-2 border-white/30 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-4xl mb-6">👑⚖️</div>
+                  <h3 className="text-3xl font-bold mb-6 text-yellow-200">Judge Access!</h3>
+                  {judgeQrCodeUrl && (
+                    <div className="bg-white p-8 rounded-3xl inline-block mb-6 shadow-xl transform hover:scale-105 transition-transform">
+                      <Image src={judgeQrCodeUrl} alt="Judge QR Code" width={280} height={280} />
+                    </div>
+                  )}
+                  <div className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-6 py-4 rounded-2xl font-black text-2xl mb-4">
+                    JUDGE
+                  </div>
+                  <p className="text-lg text-white/90">For Ann to control the game!</p>
                 </div>
 
                 {/* Players List */}

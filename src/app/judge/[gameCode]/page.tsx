@@ -169,7 +169,7 @@ export default function JudgePage() {
           <div className="flex justify-between items-center mb-6">
             <button 
               onClick={goHome} 
-              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30"
+              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-white/30 relative z-20"
             >
               ← Back to Big Screen
             </button>
@@ -178,7 +178,7 @@ export default function JudgePage() {
             {(gameState.phase !== 'waiting') && (
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-red-300/50"
+                className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 backdrop-blur-sm border border-red-300/50 relative z-20"
               >
                 🔄 Reset Game
               </button>
@@ -281,7 +281,7 @@ export default function JudgePage() {
                 <button
                   onClick={startRanking}
                   className="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-xl
-                           hover:bg-blue-600 transition-all duration-300"
+                           hover:bg-blue-600 transition-all duration-300 relative z-10"
                 >
                   🏆 Start Ranking Answers
                 </button>
@@ -308,7 +308,7 @@ export default function JudgePage() {
                         <div className="flex space-x-2 justify-center">
                           <button
                             onClick={() => handleRankAnswer(answer.id, 1)}
-                            className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                            className={`px-4 py-2 rounded-lg font-bold transition-all relative z-10 ${
                               rankings[answer.id] === 1 
                                 ? 'bg-yellow-500 text-black' 
                                 : 'bg-white/20 text-white hover:bg-yellow-500/30'
@@ -318,7 +318,7 @@ export default function JudgePage() {
                           </button>
                           <button
                             onClick={() => handleRankAnswer(answer.id, 2)}
-                            className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                            className={`px-4 py-2 rounded-lg font-bold transition-all relative z-10 ${
                               rankings[answer.id] === 2 
                                 ? 'bg-gray-400 text-black' 
                                 : 'bg-white/20 text-white hover:bg-gray-400/30'
@@ -328,7 +328,7 @@ export default function JudgePage() {
                           </button>
                           <button
                             onClick={() => handleRankAnswer(answer.id, 3)}
-                            className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                            className={`px-4 py-2 rounded-lg font-bold transition-all relative z-10 ${
                               rankings[answer.id] === 3 
                                 ? 'bg-orange-500 text-black' 
                                 : 'bg-white/20 text-white hover:bg-orange-500/30'
@@ -342,7 +342,7 @@ export default function JudgePage() {
                               delete newRankings[answer.id]
                               setRankings(newRankings)
                             }}
-                            className="px-4 py-2 bg-red-500/20 text-white rounded-lg hover:bg-red-500/30 transition-all"
+                            className="px-4 py-2 bg-red-500/20 text-white rounded-lg hover:bg-red-500/30 transition-all relative z-10"
                           >
                             ❌
                           </button>
@@ -357,7 +357,7 @@ export default function JudgePage() {
                       disabled={Object.keys(rankings).length === 0}
                       className="bg-green-500 text-white px-8 py-4 rounded-xl font-bold text-xl
                                hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed
-                               transition-all duration-300"
+                               transition-all duration-300 relative z-10"
                     >
                       ✅ Submit Rankings
                     </button>
