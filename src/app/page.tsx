@@ -29,7 +29,7 @@ interface GameState {
 }
 
 export default function Home() {
-  const [gameCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase())
+  const [gameCode, setGameCode] = useState('ANNS30TH') // Fixed game code for the party
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gameState, setGameState] = useState<GameState>({
     phase: 'waiting',
@@ -44,21 +44,22 @@ export default function Home() {
       const response = await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getGameState', gameCode })
+        body: JSON.stringify({ action: 'getOrCreateGame' })
       })
       const data = await response.json()
       if (data.success) {
+        setGameCode(data.gameCode)
         setGameState(data.gameState)
         setPlayers(data.players)
       }
     } catch (error) {
       console.error('Error fetching game state:', error)
     }
-  }, [gameCode])
+  }, [])
 
   useEffect(() => {
     // Generate QR code for player registration
-    const registrationUrl = `${window.location.origin}/register/${gameCode}`
+    const registrationUrl = `${window.location.origin}/register/ANNS30TH`
     QRCode.toDataURL(registrationUrl)
       .then(url => setQrCodeUrl(url))
       .catch(err => console.error(err))
@@ -68,14 +69,14 @@ export default function Home() {
     // Poll for game state updates
     const interval = setInterval(fetchGameState, 2000)
     return () => clearInterval(interval)
-  }, [gameCode, fetchGameState])
+  }, [fetchGameState])
 
   const startGame = async () => {
     try {
       await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'startGame', gameCode })
+        body: JSON.stringify({ action: 'startGame' })
       })
     } catch (error) {
       console.error('Error starting game:', error)
@@ -87,7 +88,7 @@ export default function Home() {
       await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'nextQuestion', gameCode })
+        body: JSON.stringify({ action: 'nextQuestion' })
       })
     } catch (error) {
       console.error('Error going to next question:', error)
@@ -99,7 +100,7 @@ export default function Home() {
       await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'showFinalResults', gameCode })
+        body: JSON.stringify({ action: 'showFinalResults' })
       })
     } catch (error) {
       console.error('Error showing final results:', error)
@@ -324,7 +325,7 @@ export default function Home() {
       {/* Admin Controls */}
       <div className="fixed bottom-4 right-4">
         <a 
-          href={`/judge/${gameCode}`}
+          href={`/judge/ANNS30TH`}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
         >
           Judge Interface

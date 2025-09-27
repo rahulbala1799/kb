@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid'
 
 export default function RegisterPage() {
-  const params = useParams()
   const router = useRouter()
-  const gameCode = params.gameCode as string
+  const gameCode = 'ANNS30TH' // Fixed game code
   const [playerName, setPlayerName] = useState('')
   const [playerId, setPlayerId] = useState('')
   const [registered, setRegistered] = useState(false)
@@ -17,15 +16,14 @@ export default function RegisterPage() {
     // Check if already registered for this game
     const storedPlayerId = localStorage.getItem('playerId')
     const storedPlayerName = localStorage.getItem('playerName')
-    const storedGameCode = localStorage.getItem('gameCode')
 
-    if (storedPlayerId && storedPlayerName && storedGameCode === gameCode) {
+    if (storedPlayerId && storedPlayerName) {
       setPlayerId(storedPlayerId)
       setPlayerName(storedPlayerName)
       setRegistered(true)
-      router.push(`/play/${gameCode}`) // Redirect to play page
+      router.push(`/play`) // Redirect to play page
     }
-  }, [gameCode, router])
+  }, [router])
 
   const handleRegister = async () => {
     if (!playerName.trim() || loading) return
@@ -39,7 +37,6 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'registerPlayer',
-          gameCode,
           playerId: newPlayerId,
           playerName: playerName.trim()
         })
@@ -49,10 +46,9 @@ export default function RegisterPage() {
       if (data.success) {
         localStorage.setItem('playerId', newPlayerId)
         localStorage.setItem('playerName', playerName.trim())
-        localStorage.setItem('gameCode', gameCode)
         setPlayerId(newPlayerId)
         setRegistered(true)
-        router.push(`/play/${gameCode}`) // Redirect to play page
+        router.push(`/play`) // Redirect to play page
       } else {
         alert(`Registration failed: ${data.message}`)
       }

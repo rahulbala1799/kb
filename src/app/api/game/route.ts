@@ -22,10 +22,12 @@ const pool = new Pool({
 // In-memory storage for real-time game state (in production, use Redis)
 const gameStates = new Map()
 
+const SINGLE_GAME_CODE = 'ANNS30TH'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { action, gameCode, playerId, playerName, answer, judgeName, rankings } = body
+    const { action, playerId, playerName, answer, judgeName, rankings } = body
 
     // Initialize database on first use
     if (!gameStates.has('db_initialized')) {
@@ -34,35 +36,38 @@ export async function POST(request: NextRequest) {
     }
 
     switch (action) {
+      case 'getOrCreateGame':
+        return handleGetOrCreateGame()
+      
       case 'registerPlayer':
-        return handleRegisterPlayer(gameCode, playerId, playerName)
+        return handleRegisterPlayer(SINGLE_GAME_CODE, playerId, playerName)
       
       case 'registerJudge':
-        return handleRegisterJudge(gameCode, judgeName)
+        return handleRegisterJudge(SINGLE_GAME_CODE, judgeName)
       
       case 'getGameState':
-        return handleGetGameState(gameCode, playerId)
+        return handleGetGameState(SINGLE_GAME_CODE, playerId)
       
       case 'getJudgeGameState':
-        return handleGetJudgeGameState(gameCode)
+        return handleGetJudgeGameState(SINGLE_GAME_CODE)
       
       case 'submitAnswer':
-        return handleSubmitAnswer(gameCode, playerId, answer)
+        return handleSubmitAnswer(SINGLE_GAME_CODE, playerId, answer)
       
       case 'startRanking':
-        return handleStartRanking(gameCode)
+        return handleStartRanking(SINGLE_GAME_CODE)
       
       case 'submitRankings':
-        return handleSubmitRankings(gameCode, rankings)
+        return handleSubmitRankings(SINGLE_GAME_CODE, rankings)
       
       case 'startGame':
-        return handleStartGame(gameCode)
+        return handleStartGame(SINGLE_GAME_CODE)
       
       case 'nextQuestion':
-        return handleNextQuestion(gameCode)
+        return handleNextQuestion(SINGLE_GAME_CODE)
       
       case 'showFinalResults':
-        return handleShowFinalResults(gameCode)
+        return handleShowFinalResults(SINGLE_GAME_CODE)
       
       default:
         return NextResponse.json({ success: false, message: 'Unknown action' }, { status: 400 })
@@ -70,6 +75,76 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Game API error:', error)
     return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 })
+  }
+}
+
+async function handleGetOrCreateGame() {
+  try {
+    // Check if game exists, create if not
+    let game = await getGame(SINGLE_GAME_CODE)
+    if (!game) {
+      game = await createGame(SINGLE_GAME_CODE, 'system', 'System')
+    }
+
+    const players = await getPlayers(SINGLE_GAME_CODE)
+    const questions = await getQuestions()
+    
+    const currentQuestion = game.phase === 'question' || game.phase === 'answering' 
+      ? questions[game.question_index] 
+      : undefined
+
+    // Get current answers for ranking/results phase
+    let answers: Array<{ id: string; answer: string; rank?: number }> = []
+    if (game.phase === 'ranking') {
+      answers = players
+        .filter(p => p.current_answer)
+        .map(p => ({
+          id: p.player_id,
+          answer: p.current_answer,
+          rank: undefined
+        }))
+    } else if (game.phase === 'results') {
+      // Get ranked answers from database
+      const rankedAnswersResult = await pool.query(
+        'SELECT player_id, rank FROM answers WHERE game_code = $1 AND question_id = $2 AND rank IS NOT NULL',
+        [SINGLE_GAME_CODE, game.question_index + 1]
+      )
+      const rankMap = new Map()
+      rankedAnswersResult.rows.forEach(row => {
+        rankMap.set(row.player_id, row.rank)
+      })
+
+      answers = players
+        .filter(p => p.current_answer)
+        .map(p => ({
+          id: p.player_id,
+          answer: p.current_answer,
+          rank: rankMap.get(p.player_id)
+        }))
+    }
+
+    return NextResponse.json({
+      success: true,
+      gameCode: SINGLE_GAME_CODE,
+      gameState: {
+        phase: game.phase,
+        currentQuestion,
+        currentQuestionIndex: game.question_index,
+        totalQuestions: game.total_questions,
+        timeRemaining: game.time_remaining,
+        answers
+      },
+      players: players.map(p => ({
+        id: p.player_id,
+        name: p.player_name,
+        score: p.score,
+        hasAnswered: p.has_answered,
+        answer: p.current_answer
+      }))
+    })
+  } catch (error) {
+    console.error('Error getting or creating game:', error)
+    return NextResponse.json({ success: false, message: 'Failed to get or create game' }, { status: 500 })
   }
 }
 

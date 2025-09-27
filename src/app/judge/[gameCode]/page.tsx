@@ -18,7 +18,7 @@ interface GameState {
 
 export default function JudgePage() {
   const params = useParams()
-  const gameCode = (params?.gameCode as string) || 'DEMO123'
+  const gameCode = (params?.gameCode as string) || 'ANNS30TH'
   const [judgeName, setJudgeName] = useState('')
   const [isJudge, setIsJudge] = useState(false)
   const [gameState, setGameState] = useState<GameState>({
@@ -34,7 +34,7 @@ export default function JudgePage() {
       const response = await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getJudgeGameState', gameCode })
+        body: JSON.stringify({ action: 'getJudgeGameState' })
       })
       const data = await response.json()
       if (data.success) {
@@ -46,7 +46,7 @@ export default function JudgePage() {
     } catch (error) {
       console.error('Error fetching game state:', error)
     }
-  }, [gameCode])
+  }, [])
 
   useEffect(() => {
     // Poll for game state updates
@@ -63,7 +63,7 @@ export default function JudgePage() {
       const response = await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'registerJudge', gameCode, judgeName })
+        body: JSON.stringify({ action: 'registerJudge', judgeName })
       })
       const data = await response.json()
       if (data.success) {
@@ -95,8 +95,7 @@ export default function JudgePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          action: 'startRanking', 
-          gameCode 
+          action: 'startRanking'
         })
       })
       const data = await response.json()
@@ -115,7 +114,6 @@ export default function JudgePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           action: 'submitRankings', 
-          gameCode, 
           rankings 
         })
       })
