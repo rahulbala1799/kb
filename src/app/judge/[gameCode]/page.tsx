@@ -87,15 +87,15 @@ export default function JudgePage() {
   const handleRankAnswer = (answerId: string, rank: number) => {
     const newRankings = { ...rankings }
     
-    // Remove this rank from any other answer
-    Object.keys(newRankings).forEach(id => {
-      if (newRankings[id] === rank) {
-        delete newRankings[id]
-      }
-    })
+    // Check if this answer already has this rank
+    if (newRankings[answerId] === rank) {
+      // If clicking the same rank again, remove it (toggle off)
+      delete newRankings[answerId]
+    } else {
+      // Assign rank to this answer (multiple answers can have same rank)
+      newRankings[answerId] = rank
+    }
     
-    // Assign rank to this answer
-    newRankings[answerId] = rank
     setRankings(newRankings)
   }
 
@@ -294,8 +294,17 @@ export default function JudgePage() {
                 <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-6 mb-6">
                   <h2 className="text-2xl font-bold text-white mb-4 text-center">🏆 Rank the Answers</h2>
                   <p className="text-white/80 text-center mb-6">
-                    Tap the medal buttons to rank answers. Multiple answers can have the same rank.
+                    Tap the medal buttons to rank answers. You can give multiple answers the same rank if they're equally good!
                   </p>
+                  <div className="bg-yellow-400/20 border-2 border-yellow-300/50 rounded-2xl p-4 mb-6">
+                    <div className="text-yellow-200 font-bold text-lg mb-2">💡 Ranking Tips</div>
+                    <div className="text-yellow-100 text-sm space-y-1">
+                      <div>• Multiple answers can be 1st place (they'll all get 100 points)</div>
+                      <div>• Multiple answers can be 2nd place (they'll all get 50 points)</div>
+                      <div>• Multiple answers can be 3rd place (they'll all get 25 points)</div>
+                      <div>• Click the same medal again to remove the ranking</div>
+                    </div>
+                  </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {answers.map((answer) => (

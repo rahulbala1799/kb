@@ -32,6 +32,12 @@ export default function Home() {
   const [gameCode, setGameCode] = useState('ANNS30TH') // Fixed game code for the party
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [judgeQrCodeUrl, setJudgeQrCodeUrl] = useState('')
+
+  // Generate anonymous player ID for display
+  const getAnonymousPlayerId = (playerId: string) => {
+    // Use last 4 characters of player ID for anonymous display
+    return `Player ${playerId.slice(-4).toUpperCase()}`
+  }
   const [gameState, setGameState] = useState<GameState>({
     phase: 'waiting',
     currentQuestionIndex: 0,
@@ -377,7 +383,7 @@ export default function Home() {
                             <div key={player.id} className="bg-gradient-to-r from-white/20 to-white/10 p-6 rounded-2xl text-left border border-white/20 transform hover:scale-105 transition-transform">
                               <div className="flex items-center space-x-3 mb-3">
                                 <div className="text-2xl">💭</div>
-                                <div className="text-white/80 font-bold">{player.name}</div>
+                                <div className="text-white/80 font-bold">{getAnonymousPlayerId(player.id)}</div>
                               </div>
                               <div className="text-xl text-white font-medium bg-white/10 p-4 rounded-xl">
                                 &quot;{player.answer}&quot;
