@@ -55,6 +55,12 @@ export async function POST(request: NextRequest) {
       case 'startGame':
         return handleStartGame(gameCode)
       
+      case 'nextQuestion':
+        return handleNextQuestion(gameCode)
+      
+      case 'showFinalResults':
+        return handleShowFinalResults(gameCode)
+      
       default:
         return NextResponse.json({ success: false, message: 'Unknown action' }, { status: 400 })
     }
@@ -207,14 +213,8 @@ async function handleSubmitAnswer(gameCode: string, playerId: string, answer: st
     // Update player answer
     await updatePlayerAnswer(gameCode, playerId, answer)
     
-    // Check if all players have answered
-    const players = await getPlayers(gameCode)
-    const answeredPlayers = players.filter(p => p.has_answered)
-    
-    // If all players answered, move to ranking phase
-    if (answeredPlayers.length === players.length && players.length > 0) {
-      await updateGamePhase(gameCode, 'ranking')
-    }
+    // Immediately move to ranking phase so judge gets the answer right away
+    await updateGamePhase(gameCode, 'ranking')
 
     return NextResponse.json({
       success: true,
@@ -240,42 +240,8 @@ async function handleSubmitRankings(gameCode: string, rankings: { [key: string]:
       }
     }
 
-    // Move to results phase
+    // Move to results phase and wait for manual next question
     await updateGamePhase(gameCode, 'results')
-
-    // Auto-advance to next question after 5 seconds
-    setTimeout(async () => {
-      try {
-        const game = await getGame(gameCode)
-        const questions = await getQuestions()
-        
-        if (game && game.phase === 'results') {
-          if (game.question_index < questions.length - 1) {
-            // Next question
-            await updateGamePhase(gameCode, 'question', game.question_index + 1, 30)
-            
-            // Reset player answers
-            const players = await getPlayers(gameCode)
-            for (const player of players) {
-              await pool.query(
-                'UPDATE players SET has_answered = FALSE, current_answer = NULL WHERE game_code = $1 AND player_id = $2',
-                [gameCode, player.player_id]
-              )
-            }
-
-            // Start answering phase after 5 seconds
-            setTimeout(async () => {
-              await updateGamePhase(gameCode, 'answering')
-            }, 5000)
-          } else {
-            // Game finished
-            await updateGamePhase(gameCode, 'final')
-          }
-        }
-      } catch (error) {
-        console.error('Error in auto-advance:', error)
-      }
-    }, 5000)
 
     return NextResponse.json({
       success: true,
@@ -317,6 +283,61 @@ async function handleStartGame(gameCode: string) {
   } catch (error) {
     console.error('Error starting game:', error)
     return NextResponse.json({ success: false, message: 'Failed to start game' }, { status: 500 })
+  }
+}
+
+async function handleNextQuestion(gameCode: string) {
+  try {
+    const game = await getGame(gameCode)
+    const questions = await getQuestions()
+    
+    if (!game) {
+      return NextResponse.json({ success: false, message: 'Game not found' }, { status: 404 })
+    }
+
+    if (game.question_index < questions.length - 1) {
+      // Next question
+      await updateGamePhase(gameCode, 'question', game.question_index + 1, 30)
+      
+      // Reset player answers
+      const players = await getPlayers(gameCode)
+      for (const player of players) {
+        await pool.query(
+          'UPDATE players SET has_answered = FALSE, current_answer = NULL WHERE game_code = $1 AND player_id = $2',
+          [gameCode, player.player_id]
+        )
+      }
+
+      // Start answering phase after 3 seconds
+      setTimeout(async () => {
+        await updateGamePhase(gameCode, 'answering')
+      }, 3000)
+    } else {
+      // No more questions, go to final results
+      await updateGamePhase(gameCode, 'final')
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Advanced to next question'
+    })
+  } catch (error) {
+    console.error('Error advancing to next question:', error)
+    return NextResponse.json({ success: false, message: 'Failed to advance' }, { status: 500 })
+  }
+}
+
+async function handleShowFinalResults(gameCode: string) {
+  try {
+    await updateGamePhase(gameCode, 'final')
+
+    return NextResponse.json({
+      success: true,
+      message: 'Showing final results'
+    })
+  } catch (error) {
+    console.error('Error showing final results:', error)
+    return NextResponse.json({ success: false, message: 'Failed to show final results' }, { status: 500 })
   }
 }
 

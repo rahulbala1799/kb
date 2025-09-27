@@ -82,6 +82,30 @@ export default function Home() {
     }
   }
 
+  const nextQuestion = async () => {
+    try {
+      await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'nextQuestion', gameCode })
+      })
+    } catch (error) {
+      console.error('Error going to next question:', error)
+    }
+  }
+
+  const showFinalResults = async () => {
+    try {
+      await fetch('/api/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'showFinalResults', gameCode })
+      })
+    } catch (error) {
+      console.error('Error showing final results:', error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-500 to-purple-600 text-white">
       {/* Waiting Phase - Show QR Code */}
@@ -138,8 +162,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Question Phase - Show Current Question */}
-      {gameState.phase === 'question' && gameState.currentQuestion && (
+      {/* Question Phase - Show Current Question with Live Answers */}
+      {(gameState.phase === 'question' || gameState.phase === 'answering') && gameState.currentQuestion && (
         <div className="flex items-center justify-center min-h-screen p-8">
           <div className="text-center max-w-6xl w-full">
             <div className="mb-8">
@@ -148,10 +172,10 @@ export default function Home() {
                 <span className="text-yellow-300 font-bold text-4xl">{gameState.timeRemaining}s</span>
               </div>
               
-              <h1 className="text-6xl font-bold mb-12 leading-tight">{gameState.currentQuestion.question}</h1>
+              <h1 className="text-5xl font-bold mb-8 leading-tight">{gameState.currentQuestion.question}</h1>
               
-              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8">
-                <h3 className="text-3xl font-bold mb-6">📝 Type Your Answer on Your Phone!</h3>
+              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8 mb-8">
+                <h3 className="text-2xl font-bold mb-6">📝 Type Your Answer on Your Phone!</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {players.map(player => (
                     <div key={player.id} className={`p-4 rounded-xl text-center ${
@@ -165,18 +189,134 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+
+              {/* Live Answers Display */}
+              <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8">
+                <h3 className="text-2xl font-bold mb-6">💬 Live Answers</h3>
+                {players.filter(p => p.hasAnswered && p.answer).length === 0 ? (
+                  <p className="text-white/60 text-xl py-8">Waiting for answers...</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {players
+                      .filter(p => p.hasAnswered && p.answer)
+                      .map(player => (
+                        <div key={player.id} className="bg-white/10 p-6 rounded-xl text-left">
+                          <div className="text-white/80 text-sm mb-2">Player {player.id.slice(-4)}</div>
+                          <div className="text-lg text-white font-medium">
+                            &quot;{player.answer}&quot;
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+                
+                <div className="mt-6 text-white/70 text-sm">
+                  {players.filter(p => p.hasAnswered).length} of {players.length} players answered
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Other phases... */}
-      {(gameState.phase === 'answering' || gameState.phase === 'ranking' || gameState.phase === 'results' || gameState.phase === 'final') && (
+      {/* Results Phase - Show Ranked Answers */}
+      {gameState.phase === 'results' && gameState.answers && (
         <div className="flex items-center justify-center min-h-screen p-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">🎮 Game in Progress</h1>
-            <p className="text-xl">Phase: {gameState.phase}</p>
-            <p className="text-lg">Question {gameState.currentQuestionIndex + 1} of {gameState.totalQuestions}</p>
+          <div className="text-center max-w-6xl w-full">
+            <h1 className="text-5xl font-bold mb-8">🏆 Results - Question {gameState.currentQuestionIndex + 1}</h1>
+            
+            <div className="space-y-6 mb-8">
+              {gameState.answers
+                .filter(answer => answer.rank && answer.rank <= 3)
+                .sort((a, b) => (a.rank || 999) - (b.rank || 999))
+                .map((answer) => (
+                  <div key={answer.id} className={`p-8 rounded-3xl border-4 ${
+                    answer.rank === 1 ? 'bg-yellow-500/30 border-yellow-400' :
+                    answer.rank === 2 ? 'bg-gray-400/30 border-gray-400' :
+                    answer.rank === 3 ? 'bg-orange-500/30 border-orange-400' :
+                    'bg-white/10 border-white/20'
+                  }`}>
+                    <div className="flex justify-between items-center">
+                      <div className="text-left flex-1">
+                        <div className="flex items-center space-x-4 mb-4">
+                          <span className="text-4xl">
+                            {answer.rank === 1 ? '🥇' : answer.rank === 2 ? '🥈' : answer.rank === 3 ? '🥉' : ''}
+                          </span>
+                          <span className="text-2xl font-bold">
+                            {answer.rank === 1 ? '1st Place' : answer.rank === 2 ? '2nd Place' : answer.rank === 3 ? '3rd Place' : ''}
+                          </span>
+                          <span className="text-xl text-white/80">Player {answer.id.slice(-4)}</span>
+                        </div>
+                        <div className="text-xl bg-white/10 p-4 rounded-xl">
+                          &quot;{answer.answer}&quot;
+                        </div>
+                      </div>
+                      <div className="text-right ml-6">
+                        <div className="text-yellow-300 font-bold text-3xl">
+                          {answer.rank === 1 ? '100' : answer.rank === 2 ? '50' : answer.rank === 3 ? '25' : '0'} pts
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Next Question Button */}
+            <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-8">
+              {gameState.currentQuestionIndex < gameState.totalQuestions - 1 ? (
+                <button
+                  onClick={nextQuestion}
+                  className="bg-blue-500 text-white px-12 py-6 rounded-xl font-bold text-2xl
+                           hover:bg-blue-600 transition-all duration-300"
+                >
+                  ➡️ Next Question
+                </button>
+              ) : (
+                <button
+                  onClick={showFinalResults}
+                  className="bg-purple-500 text-white px-12 py-6 rounded-xl font-bold text-2xl
+                           hover:bg-purple-600 transition-all duration-300"
+                >
+                  🏆 Final Results
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Final Results */}
+      {gameState.phase === 'final' && (
+        <div className="flex items-center justify-center min-h-screen p-8">
+          <div className="text-center max-w-4xl w-full">
+            <div className="text-8xl mb-6">🏆</div>
+            <h1 className="text-6xl font-bold mb-8">🎂 Final Results! 🎂</h1>
+            
+            <div className="space-y-6">
+              {players
+                .sort((a, b) => b.score - a.score)
+                .map((player, index) => (
+                  <div key={player.id} className={`p-8 rounded-3xl border-4 ${
+                    index === 0 ? 'bg-yellow-500/30 border-yellow-400' :
+                    index === 1 ? 'bg-gray-400/30 border-gray-400' :
+                    index === 2 ? 'bg-orange-500/30 border-orange-400' :
+                    'bg-white/10 border-white/20'
+                  } flex justify-between items-center`}>
+                    <div className="flex items-center space-x-6">
+                      <span className="text-4xl">
+                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                      </span>
+                      <span className="text-4xl font-bold">{player.name}</span>
+                    </div>
+                    <span className="text-yellow-300 font-bold text-4xl">{player.score} points</span>
+                  </div>
+                ))}
+            </div>
+            
+            <div className="mt-12">
+              <h2 className="text-4xl font-bold mb-4">🎉 Happy Birthday Ann! 🎉</h2>
+              <p className="text-2xl">Thanks for playing!</p>
+            </div>
           </div>
         </div>
       )}

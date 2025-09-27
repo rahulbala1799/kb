@@ -203,15 +203,6 @@ export default function PlayPage() {
           </div>
         )}
 
-        {gameState.phase === 'ranking' && (
-          <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 text-center">
-            <div className="text-6xl mb-4">🏆</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Judge is Ranking Answers</h2>
-            <p className="text-white/80 mb-6">All answers are being reviewed and ranked by the judge...</p>
-            <div className="animate-spin text-4xl mb-4">⚖️</div>
-            <p className="text-white/60">Your score will be updated soon!</p>
-          </div>
-        )}
 
         {gameState.phase === 'results' && (
           <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 text-center">
@@ -219,12 +210,29 @@ export default function PlayPage() {
             <h2 className="text-2xl font-bold text-white mb-4">Points Awarded!</h2>
             <p className="text-white/80 mb-6">Check the big screen for the full results!</p>
             
+            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400 p-8 rounded-2xl mb-6">
+              <p className="text-2xl font-bold text-yellow-300 mb-4">🏆 Your Score Update! 🏆</p>
+              <p className="text-5xl font-bold text-white mb-2">{score}</p>
+              <p className="text-xl text-yellow-300">Total Points</p>
+            </div>
+
+            <p className="text-white/60 text-lg">Waiting for next question...</p>
+          </div>
+        )}
+
+        {gameState.phase === 'ranking' && (
+          <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 text-center">
+            <div className="text-6xl mb-4">⚖️</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Judge is Reviewing Answers</h2>
+            <p className="text-white/80 mb-6">All answers are being ranked by the judge...</p>
+            
             <div className="bg-white/10 p-6 rounded-xl mb-6">
               <p className="text-xl font-bold text-yellow-300 mb-2">Your Current Score</p>
               <p className="text-3xl font-bold text-white">{score} points</p>
             </div>
 
-            <p className="text-white/60">Next question coming up...</p>
+            <div className="animate-pulse text-2xl mb-4">🔄</div>
+            <p className="text-white/60">Results coming soon...</p>
           </div>
         )}
 
